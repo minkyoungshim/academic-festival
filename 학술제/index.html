@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitcoin 운동 테스트</title>
+    <style>
+        /* 전체 화면 레이아웃 설정 */
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* 상단 네비게이션 바 */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #f0f2f5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 왼쪽 상단의 Fitcoin 글자 스타일 */
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        /* 오른쪽 상단의 로그인 및 아이콘 섹션 */
+        .navbar .login-section {
+            display: flex;
+            align-items: center;
+        }
+
+        /* 로그인 버튼 스타일 */
+        .login-section button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .login-section button:hover {
+            background-color: #0056b3;
+        }
+
+        /* 운동 이름 상단 고정 */
+        .exercise-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0;
+            background-color: #f0f2f5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        /* 각 운동 이름 섹션 */
+        .exercise-item {
+            text-align: center;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            flex-grow: 1;
+            flex-basis: 0;
+        }
+
+        .exercise-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .exercise-item a {
+            text-decoration: none;
+            color: #333;
+            font-size: 20px;
+            display: block;
+        }
+
+        .exercise-item-box {
+            width: 100%;
+            height: 4px;
+            background-color: #007bff;
+            margin: 10px 0 0 0;
+            border-radius: 2px;
+        }
+
+        .banner {
+            background-color: #f0f2f5;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            font-size: 36px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .footer {
+            margin-top: auto;
+            background-color: #007bff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .footer a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 2px solid #ffffff;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .footer a:hover {
+            background-color: #ffffff;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">Fitcoin</div>
+        <div class="login-section">
+            <button onclick="startFitbitAuth()">Fitbit 로그인</button>
+        </div>
+    </div>
+
+    <div class="exercise-container">
+        <div class="exercise-item" data-emoji="🏋️">
+            <a href="squirt.html">스쿼트</a>
+            <div class="exercise-item-box"></div>
+        </div>
+        <div class="exercise-item" data-emoji="💪">
+            <a href="pushup.html">푸쉬업</a>
+            <div class="exercise-item-box"></div>
+        </div>
+        <div class="exercise-item" data-emoji="🚶‍♂️">
+            <a href="lunge.html">런지</a>
+            <div class="exercise-item-box"></div>
+        </div>
+    </div>
+
+    <div class="banner" id="banner-text">운동으로 건강을 챙기세요!</div>
+
+    <div class="footer">
+        <a href="store.html">리워드 상점</a>
+    </div>
+
+    <script>
+        // Fitbit 인증 URL로 이동하는 함수
+        function startFitbitAuth() {
+            window.location.href = "http://localhost:5000/auth-url"; // Python 서버로 리디렉션
+        }
+
+        // URL에서 code 파라미터를 추출하여 토큰 요청
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            
+            if (code) {
+                // 서버에 인증 코드 전송하여 토큰 요청
+                fetch('http://localhost:5000/callback-auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code: code })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.accessToken) {
+                        console.log("Access Token:", data.accessToken);
+                        alert("Access Token: " + data.accessToken); // 받은 토큰 표시
+                    } else {
+                        console.error("토큰 요청 실패:", data);
+                        alert("토큰 요청 실패: " + JSON.stringify(data));
+                    }
+                })
+                .catch(error => {
+                    console.error("서버 통신 오류:", error);
+                    alert("서버 통신 오류: " + error);
+                });
+            }
+        };
+    </script>
+</body>
+</html>

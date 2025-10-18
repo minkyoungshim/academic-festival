@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitbit Callback</title>
+</head>
+<body>
+    <h1>Fitbit 인증 완료 중...</h1>
+    <script>
+        // URL에서 code 파라미터 추출하여 서버로 전송
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');  // URL에서 code 파라미터 추출
+
+        if (code) {
+            // Flask 서버에 인증 코드 전송하여 액세스 토큰 요청
+            fetch('http://127.0.0.1:5000/callback-auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code: code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.accessToken) {
+                    console.log("Access Token:", data.accessToken);
+                    alert("Access Token: " + data.accessToken);  // 받은 토큰 표시
+                } else {
+                    console.error("토큰 요청 실패:", data);
+                    alert("토큰 요청 실패: " + JSON.stringify(data));
+                }
+            })
+            .catch(error => {
+                console.error("서버 통신 오류:", error);
+                alert("서버 통신 오류: " + error);
+            });
+        } else {
+            alert("인증 코드가 없습니다.");  // URL에 code 파라미터가 없는 경우
+        }
+    </script>
+</body>
+</html>

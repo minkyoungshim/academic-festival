@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .header {
+            width: 100%;
+            height: 80px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .header button:hover {
+            background-color: #0056b3;
+        }
+        .main {
+            display: flex;
+            width: 100%;
+            height: calc(100vh - 80px);
+        }
+        .wardrobe {
+            width: 30%;
+            padding: 20px;
+            border-right: 2px solid #e0e0e0;
+            background-color: #fafafa;
+            box-sizing: border-box;
+        }
+        .wardrobe h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+        .item-button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: none;
+            background-color: #eee;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .item-button:hover {
+            background-color: #d0d0d0;
+        }
+        .selected-outfits {
+            width: 70%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .selected-outfits h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .outfit-display {
+            width: 100%;
+            height: 70%;
+            border: 2px dashed #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 10px;
+            flex-direction: column;
+        }
+        .image-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        .png-image {
+            max-width: 50%;
+            max-height: 50%;
+            z-index: 2;
+            object-fit: contain;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            position: absolute;
+            cursor: move; /* 드래그 가능 */
+        }
+        .remove-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .remove-button:hover {
+            background-color: #ff1a1a;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <button onclick="goToHomePage()">홈으로</button>
+        <div class="profile">
+            <span>Username</span>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="wardrobe">
+            <h2>My Wardrobe</h2>
+            <div id="wardrobeItems"></div>
+        </div>
+
+        <div class="selected-outfits">
+            <h2>Selected Outfit</h2>
+            <div class="outfit-display" id="outfitDisplay"></div>
+            <button class="remove-button" onclick="removeImages()">삭제</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let purchasedItems = JSON.parse(localStorage.getItem('purchasedItems')) || [];
+
+    purchasedItems = purchasedItems.filter(item => item.name !== '보라색 옷');
+    localStorage.setItem('purchasedItems', JSON.stringify(purchasedItems));
+
+    function goToHomePage() {
+        window.location.href = 'homepage.html';
+    }
+
+    function displayPurchasedItems() {
+        const wardrobeItems = document.getElementById('wardrobeItems');
+        wardrobeItems.innerHTML = '';
+
+        purchasedItems.forEach(item => {
+            const button = document.createElement('button');
+            button.className = 'item-button';
+            button.textContent = item.name;
+            button.onclick = () => showItemImage(item);
+            wardrobeItems.appendChild(button);
+        });
+    }
+
+    function showItemImage(item) {
+    const outfitDisplay = document.getElementById('outfitDisplay');
+    const imageElement = document.createElement('img');
+    
+    imageElement.src = item.src;
+    if (item.src.endsWith('.jpg')) {
+        imageElement.className = 'image-layer';
+        imageElement.style.zIndex = '1';
+    } else if (item.src.endsWith('.png')) {
+        imageElement.className = 'png-image';
+        imageElement.style.zIndex = '2';
+        
+        // 드래그 기능 추가
+        imageElement.onmousedown = (event) => startDrag(event, imageElement);
+    }
+    
+    outfitDisplay.appendChild(imageElement);
+}
+
+
+    function startDrag(event, element) {
+    event.preventDefault();
+    
+    
+    // 현재 마우스 클릭 지점과 이미지의 위치 차이를 계산합니다.
+    let rect = element.getBoundingClientRect();
+    let offsetX = event.clientX - rect.left;
+    let offsetY = event.clientY - rect.top;
+
+
+    // 마우스를 움직일 때 이미지 위치 업데이트
+    function moveAt(mouseEvent) {
+    const outfitDisplay = document.getElementById('outfitDisplay');
+    let displayRect = outfitDisplay.getBoundingClientRect();
+    element.style.left = (mouseEvent.clientX - displayRect.left - offsetX) + 'px';
+    element.style.top = (mouseEvent.clientY - displayRect.top - offsetY) + 'px';
+}
+
+
+    // 드래그 종료 시 이벤트 제거
+    function stopDrag() {
+        document.removeEventListener('mousemove', moveAt);
+        document.removeEventListener('mouseup', stopDrag);
+    }
+
+    // 마우스 이동 및 드래그 종료 시 이벤트 리스너 추가
+    document.addEventListener('mousemove', moveAt);
+    document.addEventListener('mouseup', stopDrag);
+}
+
+
+
+    function removeImages() {
+        const outfitDisplay = document.getElementById('outfitDisplay');
+        outfitDisplay.innerHTML = '';
+    }
+
+    window.onload = () => {
+        displayPurchasedItems();
+    };
+</script>
+
+</body>
+</html>

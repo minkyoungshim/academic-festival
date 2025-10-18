@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>푸쉬업 운동 설명</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .content {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        iframe {
+            width: 50%; /* 영상 크기 조정 */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .instructions {
+            width: 40%; /* 설명 영역 크기 조정 */
+            margin-left: 20px; /* 영상과 설명 간격 */
+        }
+        ol {
+            margin-left: 20px;
+        }
+        li {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .note {
+            background-color: #e0f7fa;
+            padding: 10px;
+            border-left: 5px solid #00796b;
+            margin: 20px 0;
+        }
+        .action-button {
+            padding: 10px 20px;
+            font-size: 18px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+        .shutdown-button {
+            background-color: #dc3545; /* 빨간색 */
+        }
+        .shutdown-button:hover {
+            background-color: #c82333; /* 어두운 빨간색 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>푸쉬업 운동 설명</h1>
+
+    <!-- 영상과 설명을 나란히 배치 -->
+    <div class="content">
+        <!-- 운동 동영상 -->
+        <iframe src="https://www.youtube.com/embed/XmxpYKKlqok" frameborder="0" allowfullscreen></iframe>
+
+        <!-- 운동 설명 -->
+        <div class="instructions">
+            <h2>푸쉬업 운동 방법</h2>
+            <ol>
+                <li><strong>준비 자세:</strong> 두 발을 어깨 너비로 벌리고, 손은 어깨 넓이로 벌린 후 바닥에 놓으세요.</li>
+                <li><strong>첫 번째 단계:</strong> 팔꿈치를 굽혀 몸을 낮추며 가슴이 바닥에 거의 닿도록 하세요.</li>
+                <li><strong>두 번째 단계:</strong> 팔을 펴면서 몸을 원래 자세로 되돌립니다. 이때 허리는 곧게 유지하세요.</li>
+                <li><strong>세 번째 단계:</strong> 이 과정을 반복하세요.</li>
+            </ol>
+            <div class="note">
+                <strong>주의 사항:</strong> 푸쉬업 운동을 할 때 허리를 지나치게 내려놓지 않고 몸을 일직선으로 유지하세요.
+            </div>
+        </div>
+    </div>
+
+    <!-- 아두이노 연결 버튼 추가 -->
+    <button class="action-button" id="connectButton">아두이노 연결</button>
+    <!-- 푸쉬업 시작 버튼 추가 -->
+    <button class="action-button" id="startButton" disabled>푸쉬업 운동 시작</button>
+    <!-- 아두이노 종료 버튼 추가 -->
+    <button class="action-button shutdown-button" id="shutdownButton">아두이노 종료</button>
+</div>
+
+<script>
+    let port; // 시리얼 포트 변수
+
+    // 아두이노에 연결하는 함수
+    async function connectToArduino() {
+        try {
+            port = await navigator.serial.requestPort(); // 사용자가 포트를 선택
+            await port.open({ baudRate: 9600 }); // 포트 열기
+            console.log('아두이노에 연결되었습니다.');
+            document.getElementById('startButton').disabled = false; // 운동 시작 버튼 활성화
+        } catch (err) {
+            console.error('아두이노에 연결할 수 없습니다:', err);
+        }
+    }
+
+    // 운동 시작 명령을 전송하는 함수
+    async function startPushupExercise() {
+        if (!port) {
+            console.log('먼저 아두이노에 연결해 주세요.');
+            return;
+        }
+
+        const writer = port.writable.getWriter(); // writer를 가져옵니다
+        const data = new TextEncoder().encode('PUSHUP_START\n'); // 아두이노에 보낼 데이터
+        await writer.write(data); // 데이터 전송
+        writer.releaseLock(); // writer의 잠금을 해제
+        console.log('푸쉬업 운동 시작 명령이 아두이노에 전송되었습니다.');
+    }
+
+    // 아두이노 종료 요청을 전송하는 함수
+    async function shutdownArduino() {
+        if (!port) {
+            console.log('먼저 아두이노에 연결해 주세요.');
+            return;
+        }
+
+        const writer = port.writable.getWriter(); // writer를 가져옵니다
+        const data = new TextEncoder().encode('SHUTDOWN\n'); // 아두이노에 보낼 데이터
+        await writer.write(data); // 데이터 전송
+        writer.releaseLock(); // writer의 잠금을 해제
+        console.log('아두이노 종료 명령이 전송되었습니다.');
+    }
+
+    // 이벤트 리스너 설정
+    document.getElementById('connectButton').addEventListener('click', connectToArduino);
+    document.getElementById('startButton').addEventListener('click', startPushupExercise);
+    document.getElementById('shutdownButton').addEventListener('click', shutdownArduino);
+</script>
+
+</body>
+</html>

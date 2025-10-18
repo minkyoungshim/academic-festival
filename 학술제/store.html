@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reward Shop</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            position: relative;
+            width: 100%;
+            padding: 20px;
+            background-color: #f5f5f5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .coin-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 20px;
+            background: #e0e0e0;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        .shop-item {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .shop-item img {
+            max-width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: grab;
+        }
+        .shop-item button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #28a745;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .shop-item button:hover {
+            background-color: #218838;
+        }
+        #purchaseMessage {
+            margin-top: 30px;
+            font-size: 20px;
+            color: #28a745;
+        }
+
+        /* 메시지 박스 스타일 */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: pink;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none; /* 초기에는 숨김 */
+            text-align: center;
+        }
+        .message-box button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .message-box button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button class="back-button" onclick="goToMyPage()">마이페이지로 이동</button>
+        <div class="coin-counter">💰<span id="coinCount">0</span></div>
+    </div>
+
+    <div class="container">
+        <h1>Reward Shop</h1>
+
+        <div class="shop-items" id="shopItems">
+            <div class="shop-item">
+                <img src="하늘색배경.jpg" alt="Shirt" draggable="true" ondragstart="drag(event)">
+                <h3>하늘색배경</h3>
+                <p>Price: 100 Points</p>
+                <button onclick="buyItem('하늘색 배경', 100, '하늘색배경.jpg', this)">Buy</button>
+            </div>
+            <div class="shop-item">
+                <img src="핑크배경.jpg" alt="Pants" draggable="true" ondragstart="drag(event)">
+                <h3>핑크배경</h3>
+                <p>Price: 150 Points</p>
+                <button onclick="buyItem('핑크배경', 150, '핑크배경.jpg', this)">Buy</button>
+            </div>
+            <div class="shop-item">
+                <img src="동숲배경.jpg" alt="Coat" draggable="true" ondragstart="drag(event)">
+                <h3>동숲배경</h3>
+                <p>Price: 200 Points</p>
+                <button onclick="buyItem('동숲배경', 200, '동숲배경.jpg', this)">Buy</button>
+            </div>
+            <div class="shop-item">
+                <img src="쿠로미.png" alt="쿠로미" draggable="true" ondragstart="drag(event)">
+                <h3>쿠로미</h3>
+                <p>Price: 120 Points</p>
+                <button onclick="buyItem('쿠로미', 120, '쿠로미.png', this)">Buy</button>
+            </div>
+            <div class="shop-item">
+                <img src="키티.png" alt="키티" draggable="true" ondragstart="drag(event)">
+                <h3>키티</h3>
+                <p>Price: 80 Points</p>
+                <button onclick="buyItem('키티', 80, '키티.png', this)">Buy</button>
+            </div>
+            <div class="shop-item">
+                <img src="마이멜로디.png" alt="마이멜로디" draggable="true" ondragstart="drag(event)">
+                <h3>마이멜로디</h3><p>Price: 80 Points</p>
+                <button onclick="buyItem('마이멜로디', 80, '마이멜로디.png', this)">Buy</button>
+            </div>
+        </div>
+
+        <div id="purchaseMessage"></div>
+    </div>
+
+    <!-- 메시지 박스 -->
+    <div class="message-box" id="messageBox">
+        <p id="messageText"></p>
+        <button onclick="closeMessage()">확인</button>
+    </div>
+
+    <script>
+        let coins = 10000; // 초기 코인 수
+
+        // 코인 수 업데이트 함수
+        function updateCoinCount() {
+            document.getElementById('coinCount').textContent = coins;
+        }
+
+        // 아이템 구매 함수
+        function buyItem(item, cost, imgSrc, button) {
+            const messageBox = document.getElementById('messageBox');
+            const messageText = document.getElementById('messageText');
+
+            // 이미 구매한 아이템 체크
+            let purchasedItems = JSON.parse(localStorage.getItem('purchasedItems')) || [];
+            if (purchasedItems.some(p => p.name === item)) {
+                messageText.textContent = `${item}은(는) 이미 구매한 아이템입니다.`;
+                messageBox.style.display = 'block';
+                return; // 이미 구매한 아이템이면 종료
+            }
+
+            if (coins >= cost) {
+                // 코인 차감
+                coins -= cost;
+
+                // 구매한 아이템을 localStorage에 저장
+                purchasedItems.push({ name: item, src: imgSrc });
+                localStorage.setItem('purchasedItems', JSON.stringify(purchasedItems));
+
+                // 구매 성공 메시지
+                messageText.textContent = `${item} 을(를) 구매하였습니다!`;
+                // 버튼 비활성화
+                button.disabled = true;
+                button.textContent = "구매 완료"; // 버튼 텍스트 변경
+            } else {
+                messageText.textContent = "코인이 부족합니다.";
+            }
+
+            // 메시지 박스 표시
+            messageBox.style.display = 'block';
+
+            // 코인 수 업데이트
+            updateCoinCount();
+        }
+
+        // 메시지 박스 닫기 함수
+        function closeMessage() {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.style.display = 'none';
+        }
+
+        // 마이페이지로 이동하는 함수
+        function goToMyPage() {
+            window.location.href = 'mypage.html';
+        }
+
+        // 드래그 함수
+        function drag(event) {
+            event.dataTransfer.setData("text/plain", event.target.src);
+        }
+
+        // 페이지 로드 시 코인 수 업데이트
+        window.onload = function() {
+            updateCoinCount();
+        };
+    </script>
+</body>
+</html>
